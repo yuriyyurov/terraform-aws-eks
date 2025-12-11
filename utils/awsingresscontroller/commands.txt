@@ -1,0 +1,16 @@
+eksctl create iamserviceaccount \
+--cluster=bonz-dev \
+--namespace=kube-system \
+--name=aws-load-balancer-controller \
+--attach-policy-arn=arn:aws:iam::324860463274:policy/AWSLoadBalancerControllerIAMPolicy \
+--override-existing-serviceaccounts \
+--region us-east-1 \
+--profile suadmin \
+--approve
+
+helm upgrade aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=bonz-dev --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set vpcId=vpc-0615189de3c480655
+
+
+kubectl delete -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.16.0/docs/examples/echoservice/echoserver-namespace.yaml &&\
+kubectl delete -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.16.0/docs/examples/echoservice/echoserver-service.yaml &&\
+kubectl delete -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.16.0/docs/examples/echoservice/echoserver-deployment.yaml
