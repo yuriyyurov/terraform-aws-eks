@@ -1,5 +1,6 @@
 provider "aws" {
-  region = local.region
+  region  = var.aws_region
+  profile = var.aws_profile
 }
 
 provider "helm" {
@@ -11,35 +12,21 @@ provider "helm" {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--profile", var.aws_profile]
     }
   }
 }
 
-data "aws_availability_zones" "available" {
-  # Exclude local zones
-  filter {
-    name   = "opt-in-status"
-    values = ["opt-in-not-required"]
-  }
-}
-
-data "aws_ecrpublic_authorization_token" "token" {
-  region = "us-east-1"
-}
+# ECR Public auth token (only available in us-east-1)
+# If using a different region, you'll need an aliased provider for us-east-1
+data "aws_ecrpublic_authorization_token" "token" {}
 
 locals {
-  name   = "ex-${basename(path.cwd)}"
-  region = "eu-west-1"
+  name = var.cluster_name
 
-  vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
-
-  tags = {
-    Example    = local.name
-    GithubRepo = "terraform-aws-eks"
-    GithubOrg  = "terraform-aws-modules"
-  }
+  tags = merge(var.tags, {
+    ClusterName = var.cluster_name
+  })
 }
 
 ################################################################################
@@ -50,7 +37,7 @@ module "eks" {
   source = "../.."
 
   name               = local.name
-  kubernetes_version = "1.33"
+  kubernetes_version = var.kubernetes_version
 
   # Gives Terraform identity admin access to cluster which will
   # allow deploying resources (Karpenter) into the cluster
@@ -73,18 +60,18 @@ module "eks" {
     }
   }
 
-  vpc_id                   = module.vpc.vpc_id
-  subnet_ids               = module.vpc.private_subnets
-  control_plane_subnet_ids = module.vpc.intra_subnets
+  vpc_id                   = var.vpc_id
+  subnet_ids               = var.private_subnet_ids
+  control_plane_subnet_ids = var.control_plane_subnet_ids
 
   eks_managed_node_groups = {
     karpenter = {
       ami_type       = "BOTTLEROCKET_x86_64"
-      instance_types = ["m5.large"]
+      instance_types = var.node_instance_types
 
-      min_size     = 2
-      max_size     = 3
-      desired_size = 2
+      min_size     = var.node_group_min_size
+      max_size     = var.node_group_max_size
+      desired_size = var.node_group_desired_size
 
       labels = {
         # Used to ensure Karpenter runs on nodes that it does not manage
@@ -143,7 +130,7 @@ resource "helm_release" "karpenter" {
   repository_username = data.aws_ecrpublic_authorization_token.token.user_name
   repository_password = data.aws_ecrpublic_authorization_token.token.password
   chart               = "karpenter"
-  version             = "1.6.0"
+  version             = var.karpenter_version
   wait                = false
 
   values = [
@@ -162,33 +149,29 @@ resource "helm_release" "karpenter" {
 }
 
 ################################################################################
-# Supporting Resources
+# Supporting Resources - Tag existing subnets for Karpenter discovery
 ################################################################################
 
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 6.0"
+resource "aws_ec2_tag" "private_subnet_karpenter" {
+  for_each = toset(var.private_subnet_ids)
 
-  name = local.name
-  cidr = local.vpc_cidr
+  resource_id = each.value
+  key         = "karpenter.sh/discovery"
+  value       = local.name
+}
 
-  azs             = local.azs
-  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
-  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
-  intra_subnets   = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 52)]
+resource "aws_ec2_tag" "private_subnet_internal_elb" {
+  for_each = toset(var.private_subnet_ids)
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
+  resource_id = each.value
+  key         = "kubernetes.io/role/internal-elb"
+  value       = "1"
+}
 
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = 1
-  }
+resource "aws_ec2_tag" "public_subnet_elb" {
+  for_each = toset(var.control_plane_subnet_ids)
 
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = 1
-    # Tags subnets for Karpenter auto-discovery
-    "karpenter.sh/discovery" = local.name
-  }
-
-  tags = local.tags
+  resource_id = each.value
+  key         = "kubernetes.io/role/elb"
+  value       = "1"
 }
