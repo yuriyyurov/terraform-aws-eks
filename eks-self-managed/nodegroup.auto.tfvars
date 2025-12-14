@@ -114,7 +114,7 @@ self_managed_node_groups = {
 
     # Compute-optimized instance for SIP signaling
     # Minimum recommended: 2 vCPU, 4GB RAM
-    instance_type = "t3.small"
+    instance_type = "c7i-flex.large"
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # IMPORTANT: Public subnet for direct internet access via Internet Gateway
@@ -249,7 +249,7 @@ self_managed_node_groups = {
 
     # Compute-optimized instance for media processing
     # Minimum recommended: 4 vCPU, 8GB RAM (media is CPU intensive)
-    instance_type = "t3.small"
+    instance_type = "c7i-flex.large"
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # IMPORTANT: Public subnet for direct RTP traffic
