@@ -116,3 +116,53 @@ module "vpc" {
   }
 }
 
+################################################################################
+# Route53 Hosted Zone
+################################################################################
+
+resource "aws_route53_zone" "this" {
+  count = var.enable_hosted_zone ? 1 : 0
+
+  name = var.domain_name
+
+  # For private hosted zones, associate with VPC
+  dynamic "vpc" {
+    for_each = var.hosted_zone_private ? [1] : []
+    content {
+      vpc_id = module.vpc.vpc_id
+    }
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = var.domain_name
+    }
+  )
+}
+
+################################################################################
+# DHCP Options Set
+################################################################################
+
+resource "aws_vpc_dhcp_options" "this" {
+  count = var.enable_hosted_zone ? 1 : 0
+
+  domain_name         = var.domain_name
+  domain_name_servers = ["AmazonProvidedDNS"]
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.vpc_name}-dhcp-options"
+    }
+  )
+}
+
+resource "aws_vpc_dhcp_options_association" "this" {
+  count = var.enable_hosted_zone ? 1 : 0
+
+  vpc_id          = module.vpc.vpc_id
+  dhcp_options_id = aws_vpc_dhcp_options.this[0].id
+}
+

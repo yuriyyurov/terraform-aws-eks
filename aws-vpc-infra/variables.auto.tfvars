@@ -93,3 +93,14 @@ enable_flow_log = false
 # flow_log_destination_type = "cloud-watch-logs"
 # flow_log_destination_arn  = "arn:aws:logs:us-east-1:123456789012:log-group:vpc-flow-logs"
 
+################################################################################
+# Route53 Hosted Zone
+################################################################################
+# enable_hosted_zone  = false -> No Route53 zone, default AWS DHCP scope
+# enable_hosted_zone  = true  -> Creates Route53 zone + custom DHCP options
+# hosted_zone_private = true  -> Private zone (associated with VPC)
+# hosted_zone_private = false -> Public zone
+
+enable_hosted_zone  = true
+domain_name         = "bonz-dev.local"
+hosted_zone_private = true

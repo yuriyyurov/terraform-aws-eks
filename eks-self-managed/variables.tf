@@ -62,6 +62,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "public_subnet_ids" {
+  description = "List of public subnet IDs for VoIP/edge nodes that require public IP addresses (e.g., SIP/RTP nodes)"
+  type        = list(string)
+  default     = []
+}
+
 ################################################################################
 # Self-Managed Node Groups
 ################################################################################
@@ -82,6 +88,36 @@ variable "self_managed_node_groups" {
 
     # Networking
     subnet_ids = optional(list(string)) # If not specified, uses var.private_subnet_ids
+
+    # Network Interfaces - for public IP assignment (VoIP/edge nodes)
+    # When specified, allows fine-grained control over network interface configuration
+    # Use associate_public_ip_address = true for nodes requiring public IPs (SIP/RTP)
+    network_interfaces = optional(list(object({
+      associate_carrier_ip_address = optional(bool)
+      associate_public_ip_address  = optional(bool)    # Set to true for VoIP nodes in public subnet
+      connection_tracking_specification = optional(object({
+        tcp_established_timeout = optional(number)
+        udp_stream_timeout      = optional(number)
+        udp_timeout             = optional(number)
+      }))
+      delete_on_termination = optional(bool, true)
+      description           = optional(string)
+      device_index          = optional(number, 0)
+      interface_type        = optional(string)
+      ipv4_address_count    = optional(number)
+      ipv4_addresses        = optional(list(string))
+      ipv4_prefix_count     = optional(number)
+      ipv4_prefixes         = optional(list(string))
+      ipv6_address_count    = optional(number)
+      ipv6_addresses        = optional(list(string))
+      ipv6_prefix_count     = optional(number)
+      ipv6_prefixes         = optional(list(string))
+      network_card_index    = optional(number)
+      network_interface_id  = optional(string)
+      primary_ipv6          = optional(bool)
+      private_ip_address    = optional(string)
+      security_groups       = optional(list(string), [])
+    })))
 
     # Kubernetes configuration
     labels = optional(map(string), {})
@@ -145,7 +181,7 @@ variable "self_managed_node_groups" {
     }))
 
     # Capacity and scaling
-    capacity_rebalance   = optional(bool, false)
+    capacity_rebalance    = optional(bool, false)
     protect_from_scale_in = optional(bool, false)
 
     # Metadata options (IMDSv2)
@@ -156,6 +192,47 @@ variable "self_managed_node_groups" {
       http_tokens                 = optional(string, "required")
       instance_metadata_tags      = optional(string)
     }))
+
+    #---------------------------------------------------------------------------
+    # Security Group Configuration
+    # For VoIP nodes (SIP/RTP), you need custom security groups with specific ports
+    #---------------------------------------------------------------------------
+    create_security_group = optional(bool, true)  # Create a dedicated SG for this node group
+
+    # Security group ingress rules (inbound traffic)
+    # Example for SIP: { sip_udp = { from_port = "5060", to_port = "5060", ip_protocol = "udp", cidr_ipv4 = "0.0.0.0/0" } }
+    # Example for RTP: { rtp = { from_port = "10000", to_port = "60000", ip_protocol = "udp", cidr_ipv4 = "0.0.0.0/0" } }
+    security_group_ingress_rules = optional(map(object({
+      name                         = optional(string)
+      cidr_ipv4                    = optional(string)
+      cidr_ipv6                    = optional(string)
+      description                  = optional(string)
+      from_port                    = optional(string)
+      ip_protocol                  = optional(string, "tcp")
+      prefix_list_id               = optional(string)
+      referenced_security_group_id = optional(string)
+      self                         = optional(bool, false)
+      tags                         = optional(map(string), {})
+      to_port                      = optional(string)
+    })), {})
+
+    # Security group egress rules (outbound traffic)
+    security_group_egress_rules = optional(map(object({
+      name                         = optional(string)
+      cidr_ipv4                    = optional(string)
+      cidr_ipv6                    = optional(string)
+      description                  = optional(string)
+      from_port                    = optional(string)
+      ip_protocol                  = optional(string, "tcp")
+      prefix_list_id               = optional(string)
+      referenced_security_group_id = optional(string)
+      self                         = optional(bool, false)
+      tags                         = optional(map(string), {})
+      to_port                      = optional(string)
+    })), {})
+
+    # Additional security group IDs to attach (existing security groups)
+    vpc_security_group_ids = optional(list(string), [])
 
     # Tags specific to this node group (merged with global tags)
     tags = optional(map(string), {})

@@ -187,3 +187,25 @@ variable "flow_log_destination_arn" {
   default     = ""
 }
 
+################################################################################
+# Route53 Hosted Zone
+################################################################################
+
+variable "enable_hosted_zone" {
+  description = "Enable Route53 Hosted Zone creation"
+  type        = bool
+  default     = false
+}
+
+variable "domain_name" {
+  description = "Domain name for Route53 Hosted Zone (e.g., bonz-dev.local)"
+  type        = string
+  default     = ""
+}
+
+variable "hosted_zone_private" {
+  description = "Whether the hosted zone is private (associated with VPC) or public"
+  type        = bool
+  default     = true
+}
+

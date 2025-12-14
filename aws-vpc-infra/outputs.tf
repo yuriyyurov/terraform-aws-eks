@@ -194,3 +194,41 @@ output "subnet_configuration" {
   }
 }
 
+################################################################################
+# Route53 Hosted Zone
+################################################################################
+
+output "hosted_zone_id" {
+  description = "The ID of the Route53 Hosted Zone"
+  value       = var.enable_hosted_zone ? aws_route53_zone.this[0].zone_id : null
+}
+
+output "hosted_zone_name" {
+  description = "The name of the Route53 Hosted Zone"
+  value       = var.enable_hosted_zone ? aws_route53_zone.this[0].name : null
+}
+
+output "hosted_zone_arn" {
+  description = "The ARN of the Route53 Hosted Zone"
+  value       = var.enable_hosted_zone ? aws_route53_zone.this[0].arn : null
+}
+
+output "hosted_zone_name_servers" {
+  description = "A list of name servers in associated delegation set (only for public zones)"
+  value       = var.enable_hosted_zone && !var.hosted_zone_private ? aws_route53_zone.this[0].name_servers : null
+}
+
+################################################################################
+# DHCP Options
+################################################################################
+
+output "dhcp_options_id" {
+  description = "The ID of the DHCP Options Set"
+  value       = var.enable_hosted_zone ? aws_vpc_dhcp_options.this[0].id : null
+}
+
+output "dhcp_options_arn" {
+  description = "The ARN of the DHCP Options Set"
+  value       = var.enable_hosted_zone ? aws_vpc_dhcp_options.this[0].arn : null
+}
+

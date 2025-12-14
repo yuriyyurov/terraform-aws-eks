@@ -26,6 +26,13 @@ private_subnet_ids = [
   "subnet-01260a20ec080d5d6", # bonz-dev-subnet-private2-us-east-1b
 ]
 
+# Public subnets for VoIP/edge nodes (SIP/RTP) - nodes with public IP requirement
+# These nodes need direct internet access via Internet Gateway (not NAT Gateway)
+public_subnet_ids = [
+  "subnet-0488896d249bade3b", # bonz-dev-subnet-public1-us-east-1a
+  "subnet-08c430ad8476c5f45", # bonz-dev-subnet-public2-us-east-1b
+]
+
 # Tags
 tags = {
   Environment = "dev"
