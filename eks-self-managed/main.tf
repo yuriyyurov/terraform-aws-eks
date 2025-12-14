@@ -51,7 +51,18 @@ module "eks" {
   control_plane_scaling_config = var.control_plane_scaling_config
 
   addons = {
-    coredns = {}
+    coredns = {
+      configuration_values = jsonencode({
+        tolerations = [
+          {
+            key      = "dedicated"
+            operator = "Equal"
+            value    = "general"
+            effect   = "NoSchedule"
+          }
+        ]
+      })
+    }
     eks-pod-identity-agent = {
       before_compute = true
     }
@@ -64,6 +75,33 @@ module "eks" {
         role_arn        = aws_iam_role.ebs_csi.arn
         service_account = "ebs-csi-controller-sa"
       }]
+      configuration_values = jsonencode({
+        controller = {
+          tolerations = [
+            {
+              key      = "dedicated"
+              operator = "Equal"
+              value    = "general"
+              effect   = "NoSchedule"
+            }
+          ]
+        }
+        node = {
+          tolerations = [
+            {
+              key      = "dedicated"
+              operator = "Equal"
+              value    = "general"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "voip-environment"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            }
+          ]
+        }
+      })
     }
   }
 

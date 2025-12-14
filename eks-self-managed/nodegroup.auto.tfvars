@@ -39,6 +39,25 @@ self_managed_node_groups = {
       }
     }
 
+    # Apply labels and taints via NodeConfig (required for AL2023 self-managed nodes)
+    cloudinit_pre_nodeadm = [{
+      content_type = "application/node.eks.aws"
+      content      = <<-EOT
+        ---
+        apiVersion: node.eks.aws/v1alpha1
+        kind: NodeConfig
+        spec:
+          kubelet:
+            flags:
+              - --node-labels=workload=general,environment=dev,lifecycle=mixed
+            config:
+              registerWithTaints:
+                - key: dedicated
+                  value: general
+                  effect: NoSchedule
+      EOT
+    }]
+
     # Storage configuration
     block_device_mappings = {
       xvda = {
@@ -150,6 +169,25 @@ self_managed_node_groups = {
       }
     }
 
+    # Apply labels and taints via NodeConfig (required for AL2023 self-managed nodes)
+    cloudinit_pre_nodeadm = [{
+      content_type = "application/node.eks.aws"
+      content      = <<-EOT
+        ---
+        apiVersion: node.eks.aws/v1alpha1
+        kind: NodeConfig
+        spec:
+          kubelet:
+            flags:
+              - --node-labels=voip-environment=sip,workload=voip-edge,network=public
+            config:
+              registerWithTaints:
+                - key: voip-environment
+                  value: sip
+                  effect: NoSchedule
+      EOT
+    }]
+
     # Storage configuration
     block_device_mappings = {
       xvda = {
@@ -212,10 +250,8 @@ self_managed_node_groups = {
     }
 
     security_group_egress_rules = {
-      # Allow all outbound traffic
+      # Allow all outbound traffic (no port specified for ip_protocol = -1)
       all_outbound = {
-        from_port   = "0"
-        to_port     = "0"
         ip_protocol = "-1"
         cidr_ipv4   = "0.0.0.0/0"
         description = "Allow all outbound traffic"
@@ -283,6 +319,25 @@ self_managed_node_groups = {
       }
     }
 
+    # Apply labels and taints via NodeConfig (required for AL2023 self-managed nodes)
+    cloudinit_pre_nodeadm = [{
+      content_type = "application/node.eks.aws"
+      content      = <<-EOT
+        ---
+        apiVersion: node.eks.aws/v1alpha1
+        kind: NodeConfig
+        spec:
+          kubelet:
+            flags:
+              - --node-labels=voip-environment=rtp,workload=voip-edge,network=public
+            config:
+              registerWithTaints:
+                - key: voip-environment
+                  value: rtp
+                  effect: NoSchedule
+      EOT
+    }]
+
     # Storage configuration
     block_device_mappings = {
       xvda = {
@@ -338,10 +393,8 @@ self_managed_node_groups = {
     }
 
     security_group_egress_rules = {
-      # Allow all outbound traffic for return RTP
+      # Allow all outbound traffic for return RTP (no port specified for ip_protocol = -1)
       all_outbound = {
-        from_port   = "0"
-        to_port     = "0"
         ip_protocol = "-1"
         cidr_ipv4   = "0.0.0.0/0"
         description = "Allow all outbound traffic"
