@@ -22,6 +22,11 @@ variable "region" {
   type        = string
 }
 
+variable "aws_profile" {
+  description = "AWS CLI profile to use for authentication"
+  type        = string
+}
+
 ################################################################################
 # Subnet Configuration
 ################################################################################
