@@ -13,7 +13,7 @@ self_managed_node_groups = {
     desired_size = 2
 
     # Instance configuration (base type, overridden by mixed_instances_policy)
-    instance_type = "t3.medium"
+    instance_type = "c7i-flex.large"
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # Network - uses private_subnet_ids from variables.auto.tfvars by default
@@ -75,10 +75,9 @@ self_managed_node_groups = {
       launch_template = {
         # Multiple instance types for better spot availability
         override = [
-          { instance_type = "t3.medium" },
-          { instance_type = "t3a.medium" },
-          { instance_type = "t3.large" },
-          { instance_type = "t3a.large" },
+          { instance_type = "t3.small" },
+          { instance_type = "c7i-flex.large" },
+          { instance_type = "m7i-flex.xlarge" },
         ]
       }
     }
@@ -110,12 +109,12 @@ self_managed_node_groups = {
 
     # Scaling configuration - typically 1 node per AZ for HA
     min_size     = 1
-    max_size     = 2
+    max_size     = 1
     desired_size = 1
 
     # Compute-optimized instance for SIP signaling
     # Minimum recommended: 2 vCPU, 4GB RAM
-    instance_type = "c5.xlarge"
+    instance_type = "t3.small"
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # IMPORTANT: Public subnet for direct internet access via Internet Gateway
@@ -245,12 +244,12 @@ self_managed_node_groups = {
 
     # Scaling configuration - typically 1 node per AZ
     min_size     = 1
-    max_size     = 2
+    max_size     = 1
     desired_size = 1
 
     # Compute-optimized instance for media processing
     # Minimum recommended: 4 vCPU, 8GB RAM (media is CPU intensive)
-    instance_type = "c5.xlarge"
+    instance_type = "t3.small"
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # IMPORTANT: Public subnet for direct RTP traffic
