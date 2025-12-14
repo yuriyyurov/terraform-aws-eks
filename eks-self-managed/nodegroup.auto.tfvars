@@ -18,10 +18,10 @@ self_managed_node_groups = {
 
     # Network - uses private_subnet_ids from variables.auto.tfvars by default
     # Uncomment to specify custom subnets for this node group:
-    # subnet_ids = [
-    #   "subnet-0ed313767477cdccf",
-    #   "subnet-01260a20ec080d5d6",
-    # ]
+    subnet_ids = [
+      "subnet-05e10f853964b3405",
+      "subnet-033a2601ea48d5bdf",
+    ]
 
     # Kubernetes labels
     labels = {
@@ -31,13 +31,13 @@ self_managed_node_groups = {
     }
 
     # Kubernetes taints (optional)
-    # taints = {
-    #   dedicated = {
-    #     key    = "dedicated"
-    #     value  = "general"
-    #     effect = "NO_SCHEDULE"
-    #   }
-    # }
+    taints = {
+      dedicated = {
+        key    = "dedicated"
+        value  = "general"
+        effect = "NO_SCHEDULE"
+      }
+    }
 
     # Storage configuration
     block_device_mappings = {
@@ -120,7 +120,8 @@ self_managed_node_groups = {
     # IMPORTANT: Public subnet for direct internet access via Internet Gateway
     # VoIP traffic cannot go through NAT Gateway (SIP embeds IP in headers)
     subnet_ids = [
-      "subnet-0488896d249bade3b", # bonz-dev-subnet-public1-us-east-1a
+      "subnet-05a0eaf28e6b3a036",
+      "subnet-09c6bf666cc32de74" # bonz-dev-subnet-public1-us-east-1a
     ]
 
     # Network interface with public IP assignment
@@ -254,7 +255,8 @@ self_managed_node_groups = {
 
     # IMPORTANT: Public subnet for direct RTP traffic
     subnet_ids = [
-      "subnet-0488896d249bade3b", # bonz-dev-subnet-public1-us-east-1a
+      "subnet-09c6bf666cc32de74",
+      "subnet-05a0eaf28e6b3a036" # bonz-dev-subnet-public1-us-east-1a
     ]
 
     # Network interface with public IP assignment
