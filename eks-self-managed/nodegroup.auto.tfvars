@@ -544,6 +544,97 @@ self_managed_node_groups = {
   }
 
   #=============================================================================
+  # Infrastructure Nodes - On-Demand (for stateful workloads like databases)
+  #=============================================================================
+  # These nodes are dedicated for infrastructure workloads that require stability
+  # Uses on-demand instances to avoid spot interruptions for DB, cache, etc.
+  # Tainted to prevent general workloads from scheduling
+  #=============================================================================
+  infra = {
+    name = "infra"
+
+    # Scaling configuration - 2 nodes for HA
+    min_size     = 2
+    max_size     = 4
+    desired_size = 2
+
+    # On-demand instance for stability (no spot)
+    instance_type = "c7i-flex.large"
+    ami_type      = "AL2023_x86_64_STANDARD"
+
+    # Private subnets for infrastructure workloads
+    subnet_ids = [
+      "subnet-05e10f853964b3405",
+      "subnet-033a2601ea48d5bdf",
+    ]
+
+    # Kubernetes labels
+    labels = {
+      "workload"    = "infra"
+      "environment" = "dev"
+      "lifecycle"   = "on-demand"
+    }
+
+    # Taint to prevent general workloads from scheduling on infra nodes
+    taints = {
+      infra = {
+        key    = "infra"
+        value  = "true"
+        effect = "NO_SCHEDULE"
+      }
+    }
+
+    # Apply labels and taints via NodeConfig (required for AL2023 self-managed nodes)
+    cloudinit_pre_nodeadm = [{
+      content_type = "application/node.eks.aws"
+      content      = <<-EOT
+        ---
+        apiVersion: node.eks.aws/v1alpha1
+        kind: NodeConfig
+        spec:
+          kubelet:
+            flags:
+              - --node-labels=workload=infra,environment=dev,lifecycle=on-demand
+            config:
+              registerWithTaints:
+                - key: infra
+                  value: "true"
+                  effect: NoSchedule
+      EOT
+    }]
+
+    # Storage configuration
+    block_device_mappings = {
+      xvda = {
+        device_name = "/dev/xvda"
+        ebs = {
+          volume_size           = 100
+          volume_type           = "gp3"
+          encrypted             = true
+          delete_on_termination = true
+        }
+      }
+    }
+
+    # IMDSv2 configuration (recommended for security)
+    metadata_options = {
+      http_endpoint               = "enabled"
+      http_tokens                 = "required"
+      http_put_response_hop_limit = 2
+    }
+
+    # NO mixed_instances_policy = pure on-demand
+    # This ensures no spot instances are used for infrastructure nodes
+
+    # Tags
+    tags = {
+      NodeGroup = "infra"
+      Purpose   = "infrastructure-workloads"
+      Lifecycle = "on-demand"
+    }
+  }
+
+  #=============================================================================
   # Alternative: Combined VoIP Edge Node (for dev/staging - cost savings)
   #=============================================================================
   # Uncomment to use a single node for both SIP and RTP
