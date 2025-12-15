@@ -210,41 +210,176 @@ self_managed_node_groups = {
 
     #---------------------------------------------------------------------------
     # Security Group Rules for SIP Traffic
-    # Adjust cidr_ipv4 to your SIP provider's IP ranges for production
+    # Zadarma IP ranges for SIP signaling
     #---------------------------------------------------------------------------
     create_security_group = true
 
     security_group_ingress_rules = {
-      # SIP signaling - UDP (primary)
-      sip_udp = {
+      #-------------------------------------------------------------------------
+      # SIP signaling - UDP (port 5060) - Zadarma IP ranges
+      #-------------------------------------------------------------------------
+      sip_udp_zadarma_1 = {
         from_port   = "5060"
         to_port     = "5060"
         ip_protocol = "udp"
-        cidr_ipv4   = "0.0.0.0/0" # Restrict to SIP provider CIDRs in production
-        description = "SIP signaling UDP"
+        cidr_ipv4   = "185.45.152.0/24"
+        description = "SIP UDP - Zadarma"
       }
-      # SIP signaling - TCP
-      sip_tcp = {
+      sip_udp_zadarma_2 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "udp"
+        cidr_ipv4   = "185.45.154.0/24"
+        description = "SIP UDP - Zadarma"
+      }
+      sip_udp_zadarma_3 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "udp"
+        cidr_ipv4   = "185.45.155.0/24"
+        description = "SIP UDP - Zadarma"
+      }
+      sip_udp_zadarma_4 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "udp"
+        cidr_ipv4   = "195.122.19.0/27"
+        description = "SIP UDP - Zadarma"
+      }
+      sip_udp_zadarma_5 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "udp"
+        cidr_ipv4   = "103.109.103.64/28"
+        description = "SIP UDP - Zadarma"
+      }
+      sip_udp_zadarma_6 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "udp"
+        cidr_ipv4   = "31.31.222.192/27"
+        description = "SIP UDP - Zadarma"
+      }
+      sip_udp_zadarma_7 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "udp"
+        cidr_ipv4   = "15.235.128.64/28"
+        description = "SIP UDP - Zadarma"
+      }
+
+      #-------------------------------------------------------------------------
+      # SIP signaling - TCP (port 5060) - Zadarma IP ranges
+      #-------------------------------------------------------------------------
+      sip_tcp_zadarma_1 = {
         from_port   = "5060"
         to_port     = "5060"
         ip_protocol = "tcp"
-        cidr_ipv4   = "0.0.0.0/0"
-        description = "SIP signaling TCP"
+        cidr_ipv4   = "185.45.152.0/24"
+        description = "SIP TCP - Zadarma"
       }
-      # SIP over TLS (optional)
-      sip_tls = {
+      sip_tcp_zadarma_2 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "185.45.154.0/24"
+        description = "SIP TCP - Zadarma"
+      }
+      sip_tcp_zadarma_3 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "185.45.155.0/24"
+        description = "SIP TCP - Zadarma"
+      }
+      sip_tcp_zadarma_4 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "195.122.19.0/27"
+        description = "SIP TCP - Zadarma"
+      }
+      sip_tcp_zadarma_5 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "103.109.103.64/28"
+        description = "SIP TCP - Zadarma"
+      }
+      sip_tcp_zadarma_6 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "31.31.222.192/27"
+        description = "SIP TCP - Zadarma"
+      }
+      sip_tcp_zadarma_7 = {
+        from_port   = "5060"
+        to_port     = "5060"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "15.235.128.64/28"
+        description = "SIP TCP - Zadarma"
+      }
+
+      #-------------------------------------------------------------------------
+      # SIP over TLS - TCP (port 5061) - Zadarma IP ranges
+      #-------------------------------------------------------------------------
+      sip_tls_zadarma_1 = {
         from_port   = "5061"
         to_port     = "5061"
         ip_protocol = "tcp"
-        cidr_ipv4   = "0.0.0.0/0"
-        description = "SIP over TLS"
+        cidr_ipv4   = "185.45.152.0/24"
+        description = "SIP TLS - Zadarma"
       }
+      sip_tls_zadarma_2 = {
+        from_port   = "5061"
+        to_port     = "5061"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "185.45.154.0/24"
+        description = "SIP TLS - Zadarma"
+      }
+      sip_tls_zadarma_3 = {
+        from_port   = "5061"
+        to_port     = "5061"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "185.45.155.0/24"
+        description = "SIP TLS - Zadarma"
+      }
+      sip_tls_zadarma_4 = {
+        from_port   = "5061"
+        to_port     = "5061"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "195.122.19.0/27"
+        description = "SIP TLS - Zadarma"
+      }
+      sip_tls_zadarma_5 = {
+        from_port   = "5061"
+        to_port     = "5061"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "103.109.103.64/28"
+        description = "SIP TLS - Zadarma"
+      }
+      sip_tls_zadarma_6 = {
+        from_port   = "5061"
+        to_port     = "5061"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "31.31.222.192/27"
+        description = "SIP TLS - Zadarma"
+      }
+      sip_tls_zadarma_7 = {
+        from_port   = "5061"
+        to_port     = "5061"
+        ip_protocol = "tcp"
+        cidr_ipv4   = "15.235.128.64/28"
+        description = "SIP TLS - Zadarma"
+      }
+
       # drachtio admin port (internal only - VPC CIDR)
       drachtio_admin = {
         from_port   = "9022"
         to_port     = "9022"
         ip_protocol = "tcp"
-        cidr_ipv4   = "172.17.0.0/16" # VPC CIDR
+        cidr_ipv4   = "172.31.0.0/16" # VPC CIDR
         description = "drachtio admin port (internal)"
       }
     }
@@ -379,7 +514,7 @@ self_managed_node_groups = {
         from_port   = "22222"
         to_port     = "22222"
         ip_protocol = "tcp"
-        cidr_ipv4   = "172.17.0.0/16" # VPC CIDR
+        cidr_ipv4   = "172.31.0.0/16" # VPC CIDR
         description = "rtpengine NG control (internal)"
       }
       # rtpengine sidecar (internal only)
@@ -387,7 +522,7 @@ self_managed_node_groups = {
         from_port   = "22223"
         to_port     = "22223"
         ip_protocol = "udp"
-        cidr_ipv4   = "172.17.0.0/16" # VPC CIDR
+        cidr_ipv4   = "172.31.0.0/16" # VPC CIDR
         description = "rtpengine sidecar DTMF (internal)"
       }
     }
