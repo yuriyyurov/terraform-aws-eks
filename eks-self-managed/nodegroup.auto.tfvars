@@ -8,9 +8,9 @@ self_managed_node_groups = {
     name = "workers-general"
 
     # Scaling configuration
-    min_size     = 1
-    max_size     = 5
-    desired_size = 2
+    min_size     = 0
+    max_size     = 6
+    desired_size = 6
 
     # Instance configuration (base type, overridden by mixed_instances_policy)
     instance_type = "c7i-flex.large"
@@ -126,7 +126,7 @@ self_managed_node_groups = {
     name = "voip-sip"
 
     # Scaling configuration - typically 1 node per AZ for HA
-    min_size     = 0
+    min_size     = 1
     max_size     = 1
     desired_size = 1
 
@@ -414,7 +414,7 @@ self_managed_node_groups = {
     name = "voip-rtp"
 
     # Scaling configuration - typically 1 node per AZ
-    min_size     = 0
+    min_size     = 1
     max_size     = 1
     desired_size = 1
 
