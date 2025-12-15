@@ -3,7 +3,6 @@
 ################################################################################
 
 self_managed_node_groups = {
-  # General purpose worker nodes (with Spot instances support)
   general = {
     name = "workers-general"
 
@@ -111,17 +110,6 @@ self_managed_node_groups = {
     }
   }
 
-  #=============================================================================
-  # VoIP Edge Nodes - SIP Signaling (Jambonz SBC-SIP DaemonSet)
-  #=============================================================================
-  # These nodes run with hostNetwork: true and need public IP for SIP traffic
-  # DaemonSet uses nodeSelector: voip-environment: sip
-  #
-  # Components deployed here:
-  #   - drachtio (SIP signaling server)
-  #   - sbc-sip-sidecar (registrar, OPTIONS handler)
-  #   - smpp (SMS gateway)
-  #=============================================================================
   voip-sip = {
     name = "voip-sip"
 
@@ -400,16 +388,6 @@ self_managed_node_groups = {
     }
   }
 
-  #=============================================================================
-  # VoIP Edge Nodes - RTP Media (Jambonz SBC-RTP DaemonSet)
-  #=============================================================================
-  # These nodes run rtpengine with hostNetwork: true for RTP media processing
-  # DaemonSet uses nodeSelector: voip-environment: rtp
-  #
-  # Components deployed here:
-  #   - rtpengine (RTP media proxy, transcoding)
-  #   - rtpengine-sidecar (DTMF events, stats)
-  #=============================================================================
   voip-rtp = {
     name = "voip-rtp"
 
@@ -543,13 +521,6 @@ self_managed_node_groups = {
     }
   }
 
-  #=============================================================================
-  # Infrastructure Nodes - On-Demand (for stateful workloads like databases)
-  #=============================================================================
-  # These nodes are dedicated for infrastructure workloads that require stability
-  # Uses on-demand instances to avoid spot interruptions for DB, cache, etc.
-  # Tainted to prevent general workloads from scheduling
-  #=============================================================================
   infra = {
     name = "infra"
 
@@ -608,7 +579,7 @@ self_managed_node_groups = {
       xvda = {
         device_name = "/dev/xvda"
         ebs = {
-          volume_size           = 100
+          volume_size           = 50
           volume_type           = "gp3"
           encrypted             = true
           delete_on_termination = true
@@ -633,222 +604,5 @@ self_managed_node_groups = {
       Lifecycle = "on-demand"
     }
   }
-
-  #=============================================================================
-  # Alternative: Combined VoIP Edge Node (for dev/staging - cost savings)
-  #=============================================================================
-  # Uncomment to use a single node for both SIP and RTP
-  # Both DaemonSets will run on the same node
-  #=============================================================================
-  # voip-edge = {
-  #   name = "voip-edge"
-  #
-  #   min_size     = 1
-  #   max_size     = 2
-  #   desired_size = 1
-  #
-  #   instance_type = "c5.2xlarge" # Larger instance for both SIP and RTP
-  #   ami_type      = "AL2023_x86_64_STANDARD"
-  #
-  #   subnet_ids = [
-  #     "subnet-0488896d249bade3b",
-  #   ]
-  #
-  #   network_interfaces = [{
-  #     associate_public_ip_address = true
-  #     device_index                = 0
-  #     delete_on_termination       = true
-  #   }]
-  #
-  #   # Both labels for combined node
-  #   labels = {
-  #     "voip-environment" = "edge"  # Use with nodeSelector tolerations
-  #     "voip-sip"         = "true"
-  #     "voip-rtp"         = "true"
-  #     "workload"         = "voip-edge"
-  #   }
-  #
-  #   taints = {
-  #     voip = {
-  #       key    = "voip-environment"
-  #       value  = "edge"
-  #       effect = "NO_SCHEDULE"
-  #     }
-  #   }
-  #
-  #   create_security_group = true
-  #
-  #   # Combined security group rules for SIP + RTP
-  #   security_group_ingress_rules = {
-  #     sip_udp = {
-  #       from_port   = "5060"
-  #       to_port     = "5060"
-  #       ip_protocol = "udp"
-  #       cidr_ipv4   = "0.0.0.0/0"
-  #       description = "SIP UDP"
-  #     }
-  #     sip_tcp = {
-  #       from_port   = "5060"
-  #       to_port     = "5060"
-  #       ip_protocol = "tcp"
-  #       cidr_ipv4   = "0.0.0.0/0"
-  #       description = "SIP TCP"
-  #     }
-  #     rtp_media = {
-  #       from_port   = "10000"
-  #       to_port     = "60000"
-  #       ip_protocol = "udp"
-  #       cidr_ipv4   = "0.0.0.0/0"
-  #       description = "RTP media"
-  #     }
-  #   }
-  #
-  #   security_group_egress_rules = {
-  #     all_outbound = {
-  #       from_port   = "0"
-  #       to_port     = "0"
-  #       ip_protocol = "-1"
-  #       cidr_ipv4   = "0.0.0.0/0"
-  #       description = "Allow all outbound"
-  #     }
-  #   }
-  #
-  #   tags = {
-  #     NodeGroup = "voip-edge"
-  #     Purpose   = "voip-combined"
-  #   }
-  # }
-
-  # Example: Compute-optimized node group (uncomment to use)
-  # compute = {
-  #   name = "workers-compute"
-  #
-  #   min_size     = 0
-  #   max_size     = 10
-  #   desired_size = 0
-  #
-  #   instance_type = "c6i.xlarge"
-  #   ami_type      = "AL2023_x86_64_STANDARD"
-  #
-  #   # Custom subnets for this node group
-  #   # subnet_ids = ["subnet-xxx", "subnet-yyy"]
-  #
-  #   labels = {
-  #     "workload" = "compute"
-  #   }
-  #
-  #   taints = {
-  #     compute = {
-  #       key    = "workload"
-  #       value  = "compute"
-  #       effect = "NO_SCHEDULE"
-  #     }
-  #   }
-  #
-  #   block_device_mappings = {
-  #     xvda = {
-  #       device_name = "/dev/xvda"
-  #       ebs = {
-  #         volume_size = 100
-  #         volume_type = "gp3"
-  #         encrypted   = true
-  #       }
-  #     }
-  #   }
-  #
-  #   tags = {
-  #     NodeGroup = "compute"
-  #     Purpose   = "compute-intensive-workloads"
-  #   }
-  # }
-
-  # Example: Memory-optimized node group (uncomment to use)
-  # memory = {
-  #   name = "workers-memory"
-  #
-  #   min_size     = 0
-  #   max_size     = 5
-  #   desired_size = 0
-  #
-  #   instance_type = "r6i.xlarge"
-  #   ami_type      = "AL2023_x86_64_STANDARD"
-  #
-  #   labels = {
-  #     "workload" = "memory"
-  #   }
-  #
-  #   taints = {
-  #     memory = {
-  #       key    = "workload"
-  #       value  = "memory"
-  #       effect = "NO_SCHEDULE"
-  #     }
-  #   }
-  #
-  #   block_device_mappings = {
-  #     xvda = {
-  #       device_name = "/dev/xvda"
-  #       ebs = {
-  #         volume_size = 100
-  #         volume_type = "gp3"
-  #         encrypted   = true
-  #       }
-  #     }
-  #   }
-  #
-  #   tags = {
-  #     NodeGroup = "memory"
-  #     Purpose   = "memory-intensive-workloads"
-  #   }
-  # }
-
-  # Example: Spot instances with mixed instance policy (uncomment to use)
-  # spot = {
-  #   name = "workers-spot"
-  #
-  #   min_size     = 0
-  #   max_size     = 20
-  #   desired_size = 0
-  #
-  #   instance_type = "t3.large"
-  #   ami_type      = "AL2023_x86_64_STANDARD"
-  #
-  #   labels = {
-  #     "workload"       = "spot"
-  #     "lifecycle"      = "spot"
-  #   }
-  #
-  #   taints = {
-  #     spot = {
-  #       key    = "lifecycle"
-  #       value  = "spot"
-  #       effect = "NO_SCHEDULE"
-  #     }
-  #   }
-  #
-  #   use_mixed_instances_policy = true
-  #   mixed_instances_policy = {
-  #     instances_distribution = {
-  #       on_demand_base_capacity                  = 0
-  #       on_demand_percentage_above_base_capacity = 0
-  #       spot_allocation_strategy                 = "capacity-optimized"
-  #     }
-  #     launch_template = {
-  #       override = [
-  #         { instance_type = "t3.large" },
-  #         { instance_type = "t3a.large" },
-  #         { instance_type = "m5.large" },
-  #         { instance_type = "m5a.large" },
-  #       ]
-  #     }
-  #   }
-  #
-  #   capacity_rebalance = true
-  #
-  #   tags = {
-  #     NodeGroup = "spot"
-  #     Purpose   = "cost-optimized-workloads"
-  #   }
-  # }
 }
 
