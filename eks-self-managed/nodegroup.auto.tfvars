@@ -94,7 +94,6 @@ self_managed_node_groups = {
       launch_template = {
         # Multiple instance types for better spot availability
         override = [
-          { instance_type = "t3.small" },
           { instance_type = "c7i-flex.large" },
           { instance_type = "m7i-flex.xlarge" },
         ]
@@ -127,7 +126,7 @@ self_managed_node_groups = {
     name = "voip-sip"
 
     # Scaling configuration - typically 1 node per AZ for HA
-    min_size     = 1
+    min_size     = 0
     max_size     = 1
     desired_size = 1
 
@@ -415,7 +414,7 @@ self_managed_node_groups = {
     name = "voip-rtp"
 
     # Scaling configuration - typically 1 node per AZ
-    min_size     = 1
+    min_size     = 0
     max_size     = 1
     desired_size = 1
 
