@@ -16,11 +16,7 @@ self_managed_node_groups = {
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # Network - uses private_subnet_ids from variables.auto.tfvars by default
-    # Uncomment to specify custom subnets for this node group:
-    subnet_ids = [
-      "subnet-05e10f853964b3405",
-      "subnet-033a2601ea48d5bdf",
-    ]
+    # subnet_ids not specified = uses private_subnet_ids automatically
 
     # Kubernetes labels
     labels = {
@@ -125,10 +121,8 @@ self_managed_node_groups = {
 
     # IMPORTANT: Public subnet for direct internet access via Internet Gateway
     # VoIP traffic cannot go through NAT Gateway (SIP embeds IP in headers)
-    subnet_ids = [
-      "subnet-05a0eaf28e6b3a036",
-      "subnet-09c6bf666cc32de74" # bonz-dev-subnet-public1-us-east-1a
-    ]
+    # Uses public_subnet_ids from variables.auto.tfvars
+    # subnet_ids not specified = uses public_subnet_ids (configured in module)
 
     # Network interface with public IP assignment
     # This is required for SIP - carriers need to reach this node directly
@@ -402,10 +396,8 @@ self_managed_node_groups = {
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # IMPORTANT: Public subnet for direct RTP traffic
-    subnet_ids = [
-      "subnet-09c6bf666cc32de74",
-      "subnet-05a0eaf28e6b3a036" # bonz-dev-subnet-public1-us-east-1a
-    ]
+    # Uses public_subnet_ids from variables.auto.tfvars
+    # subnet_ids not specified = uses public_subnet_ids (configured in module)
 
     # Network interface with public IP assignment
     network_interfaces = [{
@@ -534,10 +526,8 @@ self_managed_node_groups = {
     ami_type      = "AL2023_x86_64_STANDARD"
 
     # Private subnets for infrastructure workloads
-    subnet_ids = [
-      "subnet-05e10f853964b3405",
-      "subnet-033a2601ea48d5bdf",
-    ]
+    # Uses private_subnet_ids from variables.auto.tfvars
+    # subnet_ids not specified = uses private_subnet_ids automatically
 
     # Kubernetes labels
     labels = {

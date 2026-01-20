@@ -4,6 +4,22 @@ locals {
   tags = merge(var.tags, {
     ClusterName = var.cluster_name
   })
+
+  # Automatically assign subnets based on node group characteristics:
+  # - If node group has network_interfaces with public IP, use public_subnet_ids
+  # - If node group explicitly specifies subnet_ids, use those
+  # - Otherwise, use private_subnet_ids
+  self_managed_node_groups_with_subnets = {
+    for k, v in var.self_managed_node_groups : k => merge(v, {
+      subnet_ids = coalesce(
+        v.subnet_ids, # Use explicitly specified subnets if provided
+        # Auto-detect: if network_interfaces require public IP, use public subnets
+        try(v.network_interfaces[0].associate_public_ip_address, false) ? var.public_subnet_ids : null,
+        # Default to private subnets
+        var.private_subnet_ids
+      )
+    })
+  }
 }
 
 ################################################################################
@@ -109,8 +125,8 @@ module "eks" {
   subnet_ids               = var.private_subnet_ids
   control_plane_subnet_ids = var.control_plane_subnet_ids
 
-  # Self-managed node groups from variable
-  self_managed_node_groups = var.self_managed_node_groups
+  # Self-managed node groups with auto-assigned subnets
+  self_managed_node_groups = local.self_managed_node_groups_with_subnets
 
   tags = local.tags
 }

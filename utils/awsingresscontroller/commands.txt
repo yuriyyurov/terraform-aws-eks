@@ -2,7 +2,7 @@ eksctl create iamserviceaccount \
 --cluster=bonz-dev \
 --namespace=kube-system \
 --name=aws-load-balancer-controller \
---attach-policy-arn=arn:aws:iam::324860463274:policy/AWSLoadBalancerControllerIAMPolicy \
+--attach-policy-arn=arn:aws:iam::967985385347:policy/AWSLoadBalancerControllerIAMPolicy \
 --override-existing-serviceaccounts \
 --region us-east-1 \
 --profile suadmin \
@@ -12,7 +12,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n ku
   --set clusterName=bonz-dev \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
-  --set vpcId=vpc-0cd84a72adb38b35c \
+  --set vpcId=vpc-02cd6ac6167097a01 \
   --set tolerations[0].key=dedicated \
   --set tolerations[0].value=general \
   --set tolerations[0].operator=Equal \
